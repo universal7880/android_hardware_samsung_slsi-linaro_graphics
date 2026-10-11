@@ -146,6 +146,9 @@ bool ExynosMPP::isFormatSupportedByMPP(int format)
     case HAL_PIXEL_FORMAT_EXYNOS_YCrCb_420_SP_M:
     case HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SP_M:
     case HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SP_M_PRIV:
+#ifdef USES_FULL_RANGE_YUV
+    case HAL_PIXEL_FORMAT_EXYNOS_YCrCb_420_SP_M_FULL:
+#endif
     case HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SP_M_TILED:
         return true;
     case HAL_PIXEL_FORMAT_YV12:
@@ -472,6 +475,10 @@ void ExynosMPP::setupSrc(exynos_mpp_img &srcImg, hwc_layer_1_t &layer)
         srcImg.vaddr = srcHandle->fd2;
     }
     srcImg.format = srcHandle->format;
+#ifdef USES_FULL_RANGE_YUV
+    if (srcImg.format == HAL_PIXEL_FORMAT_EXYNOS_YCrCb_420_SP_M_FULL)
+        srcImg.format = HAL_PIXEL_FORMAT_EXYNOS_YCrCb_420_SP_M;
+#endif
 
     if (layer.blending == HWC_BLENDING_COVERAGE)
         srcImg.pre_multi = false;
