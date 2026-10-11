@@ -39,5 +39,9 @@ build_dirs += libhwc1
 endif
 endif
 
+ifeq ($(BOARD_USES_FIMGAPI_V5X), true)
+build_dirs += libfimg5x
+endif
+
 include $(call all-named-subdir-makefiles,$(build_dirs))
 endif
