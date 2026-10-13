@@ -110,9 +110,13 @@ ExynosMPP::ExynosMPP(ExynosDisplay *display, unsigned int mppType, unsigned int 
 ExynosMPP::~ExynosMPP()
 {
     if (mBufferFreeThread != NULL) {
-        mBufferFreeThread->mRunning = false;
+        {
+            android::Mutex::Autolock lock(mMutex);
+            mBufferFreeThread->requestExit();
+            mBufferFreeThread->mCondition.signal();
+        }
         mBufferFreeThread->requestExitAndWait();
-        delete mBufferFreeThread;
+        mBufferFreeThread.clear();
     }
     if (mSMemFd >= 0)
         close(mSMemFd);
@@ -1850,9 +1854,7 @@ void ExynosMPP::setAllocDevice(alloc_device_t* allocDevice)
 {
     mAllocDevice = allocDevice;
     if (mBufferFreeThread == NULL) {
-        mBufferFreeThread = new BufferFreeThread(this);
-        mBufferFreeThread->mRunning = true;
-        mBufferFreeThread->forceIncStrong(this);
+        mBufferFreeThread = android::sp<BufferFreeThread>::make(this);
         mBufferFreeThread->run("MPPThread");
     }
 }
@@ -1917,25 +1919,25 @@ void ExynosMPP::freeBuffers()
 
 bool BufferFreeThread::threadLoop()
 {
-    while(mRunning) {
-        {
-            android::Mutex::Autolock lock(mExynosMPP->mMutex);
-            while(mExynosMPP->mFreedBuffers.size() == 0 &&
-                  mExynosMPP->mState != MPP_STATE_TRANSITION) {
-                    mCondition.wait(mExynosMPP->mMutex);
-            }
+    {
+        android::Mutex::Autolock lock(mExynosMPP->mMutex);
+        while (!exitPending() && mExynosMPP->mFreedBuffers.size() == 0 &&
+               mExynosMPP->mState != MPP_STATE_TRANSITION) {
+            mCondition.wait(mExynosMPP->mMutex);
         }
-        if (mExynosMPP->mState == MPP_STATE_TRANSITION) {
-            if ((mExynosMPP->mDstBufFence[0] >= 0) && sync_wait(mExynosMPP->mDstBufFence[0], 1000) < 0)
-                ALOGE("fence wait error");
-            mExynosMPP->mState = MPP_STATE_FREE;
-        }
-        if (mExynosMPP->mFreedBuffers.size() != 0) {
-            mExynosMPP->freeBuffers();
-        }
+        if (exitPending())
+            return false;
     }
+    if (mExynosMPP->mState == MPP_STATE_TRANSITION) {
+        if ((mExynosMPP->mDstBufFence[0] >= 0) && sync_wait(mExynosMPP->mDstBufFence[0], 1000) < 0)
+            ALOGE("fence wait error");
+        mExynosMPP->mState = MPP_STATE_FREE;
+    }
+    if (mExynosMPP->mFreedBuffers.size() != 0)
+        mExynosMPP->freeBuffers();
     return true;
 }
+
 
 void *ExynosMPP::createMPP(int id, int mode, int outputMode, int drm)
 {
