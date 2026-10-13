@@ -175,7 +175,7 @@ class ExynosMPP {
         bool                            mCanRotate;
         bool                            mCanBlend;
         android::List<deleteBufferInfo > mFreedBuffers;
-        BufferFreeThread                *mBufferFreeThread;
+        android::sp<BufferFreeThread>    mBufferFreeThread;
         android::Mutex                  mMutex;
         alloc_device_t*                 mAllocDevice;
         size_t                          mNumAvailableDstBuffers;
@@ -227,9 +227,8 @@ class ExynosMPP {
 
 class BufferFreeThread: public android::Thread {
     public:
-        BufferFreeThread(ExynosMPP *exynosMPP): mRunning(false) {mExynosMPP = exynosMPP;};
+        BufferFreeThread(ExynosMPP *exynosMPP): mExynosMPP(exynosMPP) {}
         virtual bool threadLoop();
-        bool mRunning;
         android::Condition mCondition;
     private:
         ExynosMPP *mExynosMPP;
