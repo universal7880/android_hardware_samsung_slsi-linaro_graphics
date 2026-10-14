@@ -1,0 +1,100 @@
+// Copyright (C) 2026 The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+
+soong_namespace {
+    imports: [
+        "hardware/samsung_slsi-linaro/exynos",
+        "hardware/samsung_slsi-linaro/graphics",
+        "hardware/samsung_slsi-linaro/exynos5",
+    ],
+}
+
+soong_config_module_type_import {
+    from: "hardware/samsung_slsi-linaro/exynos/legacy/Android.bp",
+    module_types: [
+        "exynos_legacy_cc_defaults",
+    ],
+}
+
+cc_defaults {
+    name: "legacy_hwc_common_defaults",
+    defaults: [
+        "exynos_legacy_board_defaults",
+    ],
+    enabled: select(soong_config_variable("exynos_legacy", "hwc1"), {
+        "true": true,
+        default: false,
+    }),
+    cflags: [
+        "-Wno-unused-parameter",
+        "-Wno-unused-function",
+        "-DHLOG_CODE=0",
+    ] + select(soong_config_variable("exynos_legacy", "hwc_debug_disabled"), {
+        "true": ["-DDISABLE_HWC_DEBUG"],
+        default: [],
+    }),
+    shared_libs: [
+        "liblog",
+        "libcutils",
+        "libutils",
+        "libsync",
+        "libexynosgscaler",
+        "libion",
+    ],
+    header_libs: [
+        "libhardware_headers",
+        "libcutils_headers",
+        "libbinder_headers",
+        "libexynos_headers",
+        "device_kernel_headers",
+    ],
+}
+
+exynos_legacy_cc_defaults {
+    name: "legacy_display_board_defaults",
+    soong_config_variables: {
+        soc_base: {
+            srcs: [
+                ":%s_legacy_display_sources",
+            ],
+        },
+        display_extra_srcs: {
+            srcs: [
+                "%s",
+            ],
+        },
+    },
+}
+
+exynos_legacy_cc_defaults {
+    name: "legacy_hwcutils_board_defaults",
+    soong_config_variables: {
+        soc_base: {
+            srcs: [
+                ":%s_legacy_hwcutils_sources",
+            ],
+        },
+    },
+}
+
+exynos_legacy_cc_defaults {
+    name: "legacy_hdmi_board_defaults",
+    soong_config_variables: {
+        soc_base: {
+            srcs: [
+                ":%s_legacy_hdmi_sources",
+            ],
+        },
+    },
+}
+
+exynos_legacy_cc_defaults {
+    name: "legacy_virtualdisplay_board_defaults",
+    soong_config_variables: {
+        soc_base: {
+            srcs: [
+                ":%s_legacy_virtualdisplay_sources",
+            ],
+        },
+    },
+}

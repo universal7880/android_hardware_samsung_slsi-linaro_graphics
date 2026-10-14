@@ -942,4 +942,3 @@ int32_t ExynosVirtualDisplay::getDisplayAttributes(const uint32_t __unused attri
 {
     return 0;
 }
-

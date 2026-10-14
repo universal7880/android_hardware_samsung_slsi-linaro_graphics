@@ -1,6 +1,9 @@
-
 cc_defaults {
     name: "libhwc2_defaults",
+    enabled: select(soong_config_variable("exynos_legacy", "hwc1"), {
+        "true": false,
+        default: true,
+    }),
     proprietary: true,
     cflags: [
         "-DHLOG_CODE=0",
@@ -81,10 +84,10 @@ cc_defaults {
         "true": ["-DUSE_NOT_RESERVED_FIELD"],
         default: [],
     }) + select(soong_config_variable("exynos_hwc", "MINIMUM_DISPLAY_BRIGHTNESS"), {
-        any @ flag_val: [ "-DMINIMUM_DISPLAY_BRIGHTNESS=" + flag_val ],
+        any @ flag_val: ["-DMINIMUM_DISPLAY_BRIGHTNESS=" + flag_val],
         default: [],
     }) + select(soong_config_variable("exynos_hwc", "uses_hwc_services"), {
-        "true": [ "-DUSES_HWC_SERVICES" ],
+        "true": ["-DUSES_HWC_SERVICES"],
         default: [],
     }),
 
@@ -100,16 +103,16 @@ cc_defaults {
         "libui",
         "libion",
     ] + select(soong_config_variable("exynos_hwc", "libhdr_plugin"), {
-        any @ flag_val: [ flag_val ],
+        any @ flag_val: [flag_val],
         default: [],
     }) + select(soong_config_variable("exynos_hwc", "libhdr10p_meta_plugin"), {
-        any @ flag_val: [ flag_val ],
+        any @ flag_val: [flag_val],
         default: [],
     }) + select(soong_config_variable("exynos_hwc", "uses_dqe_interface"), {
-        "true": [ "libdqeInterface" ],
+        "true": ["libdqeInterface"],
         default: [],
     }) + select(soong_config_variable("exynos_hwc", "uses_display_color_interface"), {
-        "true": [ "libdisplaycolor_default" ],
+        "true": ["libdisplaycolor_default"],
         default: [],
     }),
 
@@ -121,10 +124,10 @@ cc_defaults {
         "libbinder_headers",
         "libexynos_headers",
     ] + select(soong_config_variable("exynos_hwc", "uses_dqe_interface"), {
-        "true": [ "libdqeInterface_headers" ],
+        "true": ["libdqeInterface_headers"],
         default: [],
     }) + select(soong_config_variable("exynos_hwc", "uses_display_color_interface"), {
-        "true": [ "libdisplaycolor_interface" ],
+        "true": ["libdisplaycolor_interface"],
         default: [],
     }),
 
@@ -162,7 +165,7 @@ cc_defaults {
             "platform/essi/virtualdisplay",
         ],
     }),
- 
+
 }
 
 cc_library_shared {
@@ -253,7 +256,7 @@ cc_library_shared {
     srcs: [
         "libhwcService/IExynosHWC.cpp",
         "libhwcService/ExynosHWCService.cpp",
-    ] ,
+    ],
 }
 
 soong_config_module_type {
@@ -278,13 +281,13 @@ hwcomposer_cc_library_shared {
     shared_libs: [
         "libexynosdisplay",
     ] + select(soong_config_variable("exynos_hwc", "uses_hwc_services"), {
-        "true": [ "libExynosHWCService" ],
+        "true": ["libExynosHWCService"],
         default: [],
     }),
 
     srcs: [
         "ExynosHWC.cpp",
-    ] ,
+    ],
 
     soong_config_variables: {
         target_board_platform: {
@@ -295,4 +298,3 @@ hwcomposer_cc_library_shared {
         },
     },
 }
-
