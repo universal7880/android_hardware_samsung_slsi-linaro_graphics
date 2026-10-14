@@ -1,0 +1,31 @@
+// Copyright (C) 2026 The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+
+cc_library_shared {
+    name: "libfimg",
+    defaults: [
+        "exynos_legacy_board_defaults",
+    ],
+    enabled: select(soong_config_variable("exynos_legacy", "fimg5x"), {
+        "true": true,
+        default: false,
+    }),
+    srcs: [
+        "FimgApi.cpp",
+        "FimgExynos5.cpp",
+    ],
+    include_dirs: [
+        "hardware/samsung_slsi-linaro/graphics/base/legacy/include",
+        "hardware/samsung_slsi-linaro/graphics/base/include",
+        "hardware/samsung_slsi-linaro/exynos/include",
+    ],
+
+    header_libs: [
+        "device_kernel_headers",
+    ],
+    shared_libs: [
+        "liblog",
+        "libutils",
+        "libbinder",
+    ],
+}
