@@ -21,6 +21,7 @@ LOCAL_PROPRIETARY_MODULE := true
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../include \
+	$(LOCAL_PATH)/../../include \
 	$(TOP)/hardware/samsung_slsi-linaro/exynos/include \
 	$(TOP)/hardware/samsung_slsi-linaro/exynos/libexynosutils
 

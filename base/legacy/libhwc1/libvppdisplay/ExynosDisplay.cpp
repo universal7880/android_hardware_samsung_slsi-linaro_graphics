@@ -190,6 +190,9 @@ enum decon_pixel_format halFormatToS3CFormat(int format)
     case HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_P_M:
         return DECON_PIXEL_FORMAT_YUV420M;
     case HAL_PIXEL_FORMAT_EXYNOS_YCrCb_420_SP_M:
+#ifdef USES_FULL_RANGE_YUV
+    case HAL_PIXEL_FORMAT_EXYNOS_YCrCb_420_SP_M_FULL:
+#endif
         return DECON_PIXEL_FORMAT_NV21M;
     case HAL_PIXEL_FORMAT_YCrCb_420_SP:
         return DECON_PIXEL_FORMAT_NV21;
@@ -197,8 +200,10 @@ enum decon_pixel_format halFormatToS3CFormat(int format)
     case HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SP_M_PRIV:
     case HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SP_M_S10B:
         return DECON_PIXEL_FORMAT_NV12M;
+#ifndef USES_LEGACY_DECON
     case HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SPN_S10B:
         return DECON_PIXEL_FORMAT_NV12N_10B;
+#endif
     case HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SPN:
         return DECON_PIXEL_FORMAT_NV12N;
     default:
@@ -234,8 +239,10 @@ int S3CFormatToHalFormat(enum decon_pixel_format format)
         return HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SP_M;
     case DECON_PIXEL_FORMAT_NV12N:
         return HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SPN;
+#ifndef USES_LEGACY_DECON
     case DECON_PIXEL_FORMAT_NV12N_10B:
         return HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SPN_S10B;
+#endif
     default:
         return -1;
     }
@@ -684,8 +691,10 @@ void ExynosDisplay::doPreProcessing(hwc_display_contents_1_t* contents)
             }
             if (isScaled(layer))
                 mLayersNeedScaling = true;
+#ifndef USES_LEGACY_DECON
             if (h->flags & GRALLOC_USAGE_DAYDREAM_SINGLE_BUFFER_MODE)
                 hasSingleBuffer = true;
+#endif
         }
     }
 
@@ -2733,7 +2742,11 @@ void ExynosDisplay::determineBandwidthSupport(hwc_display_contents_1_t *contents
                     supportedInternalMPP->mState = MPP_STATE_ASSIGNED;
                     mLayerInfos[fbIndex]->mInternalMPP = supportedInternalMPP;
                     mLayerInfos[fbIndex]->mDmaType = getDeconDMAType(mLayerInfos[fbIndex]->mInternalMPP);
+#ifdef USES_LEGACY_DECON
+                    if (mLayerInfos[fbIndex]->mDmaType >= MAX_DECON_DMA_TYPE) {
+#else
                     if (mLayerInfos[fbIndex]->mDmaType >= IDMA_G0_S) {
+#endif
                         ALOGE("getDeconDMAType with InternalMPP for FramebufferTarget failed (MPP type: %d, MPP index: %d)",
                                 mLayerInfos[fbIndex]->mInternalMPP->mType, mLayerInfos[fbIndex]->mInternalMPP->mIndex);
                         mLayerInfos[fbIndex]->mDmaType = 0;

@@ -17,7 +17,6 @@ build_dirs :=  \
     libhwjpeg  \
     libfimg    \
     libacryl \
-    libmpp \
     libmemtrack \
     giantmscl \
     libdrmresource
@@ -32,12 +31,20 @@ build_dirs +=  \
 endif
 
 ifdef BOARD_HWC_VERSION
+ifeq ($(BOARD_HWC_VERSION), libhwc1)
+build_dirs += legacy/libhwc1 legacy/libmpp
+else
 build_dirs += $(BOARD_HWC_VERSION)
+endif
 
 ifeq ($(BOARD_HWC_VERSION), hwc3)
 #hwc3 depends libexynosdisplay in libhwc2.1
 build_dirs += libhwc2.1
 endif
+endif
+
+ifeq ($(BOARD_USES_FIMGAPI_V5X), true)
+build_dirs += legacy/libfimg5x
 endif
 
 include $(call all-named-subdir-makefiles,$(build_dirs))
