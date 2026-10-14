@@ -13,4 +13,4 @@
 # limitations under the License.
 
 LOCAL_SRC_FILES += \
-	./../../$(TARGET_SOC)/libhwcutilsmodule/ExynosMPPModule.cpp
+	../../../$(TARGET_SOC_BASE)/libhwcutilsmodule/ExynosMPPModule.cpp

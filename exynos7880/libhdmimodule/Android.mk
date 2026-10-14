@@ -13,10 +13,10 @@
 # limitations under the License.
 
 ifeq ($(BOARD_HDMI_INCAPABLE), true)
-LOCAL_C_INCLUDES += $(TOP)/hardware/samsung_slsi/exynos/libhdmi_dummy
+LOCAL_C_INCLUDES += $(TOP)/hardware/samsung_slsi-linaro/graphics/base/legacy/libhwc1/libhdmi_dummy
 else
-LOCAL_C_INCLUDES += $(TOP)/hardware/samsung_slsi/exynos/libvpphdmi
+LOCAL_C_INCLUDES += $(TOP)/hardware/samsung_slsi-linaro/graphics/base/legacy/libhwc1/libvpphdmi
 endif
 
 LOCAL_SRC_FILES += \
-	./../../$(TARGET_SOC)/libhdmimodule/ExynosExternalDisplayModule.cpp
+	../../../$(TARGET_SOC_BASE)/libhdmimodule/ExynosExternalDisplayModule.cpp

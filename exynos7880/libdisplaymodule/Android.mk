@@ -13,9 +13,9 @@
 # limitations under the License.
 
 LOCAL_SRC_FILES += \
-	./../../$(TARGET_SOC)/libdisplaymodule/ExynosPrimaryDisplay.cpp \
-	./../../$(TARGET_SOC)/libdisplaymodule/ExynosDisplayResourceManagerModule.cpp
+	../../../$(TARGET_SOC_BASE)/libdisplaymodule/ExynosPrimaryDisplay.cpp \
+	../../../$(TARGET_SOC_BASE)/libdisplaymodule/ExynosDisplayResourceManagerModule.cpp
 
 ifeq ($(BOARD_USES_DUAL_DISPLAY), true)
-LOCAL_SRC_FILES += ./../../$(TARGET_SOC)/libdisplaymodule/ExynosSecondaryDisplayModule.cpp
+LOCAL_SRC_FILES += ../../../$(TARGET_SOC_BASE)/libdisplaymodule/ExynosSecondaryDisplayModule.cpp
 endif

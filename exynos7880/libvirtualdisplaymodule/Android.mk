@@ -14,9 +14,9 @@
 
 ifeq ($(BOARD_USES_VDS_BGRA8888), true)
 LOCAL_C_INCLUDES += \
-	$(TOP)/hardware/samsung_slsi/$(TARGET_SOC)/libhwcutilsmodule \
-	$(TOP)/hardware/samsung_slsi/exynos/libmpp
+	$(TOP)/hardware/samsung_slsi-linaro/graphics/$(TARGET_SOC_BASE)/libhwcutilsmodule \
+	$(TOP)/hardware/samsung_slsi-linaro/graphics/base/legacy/libmpp
 endif
 
 LOCAL_SRC_FILES += \
-	./../../$(TARGET_SOC)/libvirtualdisplaymodule/ExynosVirtualDisplayModule.cpp
+	../../../$(TARGET_SOC_BASE)/libvirtualdisplaymodule/ExynosVirtualDisplayModule.cpp
