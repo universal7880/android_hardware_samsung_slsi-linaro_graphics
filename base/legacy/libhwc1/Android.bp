@@ -1,0 +1,160 @@
+// Copyright (C) 2026 The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+
+soong_config_module_type_import {
+    from: "hardware/samsung_slsi-linaro/exynos/legacy/Android.bp",
+    module_types: [
+        "exynos_legacy_cc_library_shared",
+    ],
+}
+
+cc_library_shared {
+    name: "libExynosHWCService",
+    defaults: [
+        "legacy_hwc_common_defaults",
+    ],
+    enabled: select(soong_config_variable("exynos_legacy", "hwc_services"), {
+        "true": true,
+        default: false,
+    }),
+    shared_libs: [
+        "libbinder",
+        "libhdmi",
+        "libhwcutils",
+        "libexynosdisplay",
+    ] + select(soong_config_variable("exynos_legacy", "virtual_display"), {
+        "true": ["libvirtualdisplay"],
+        default: [],
+    }),
+    srcs: [
+        "libhwcService/ExynosHWCService.cpp",
+        "libhwcService/IExynosHWC.cpp",
+    ],
+    cflags: [
+        "-DLOG_TAG=\"HWCService\"",
+    ],
+}
+
+cc_library_shared {
+    name: "libvirtualdisplay",
+    defaults: [
+        "legacy_hwc_common_defaults",
+        "legacy_virtualdisplay_board_defaults",
+    ],
+    enabled: select(soong_config_variable("exynos_legacy", "virtual_display"), {
+        "true": true,
+        default: false,
+    }),
+    shared_libs: [
+        "libexynosv4l2",
+        "libhwcutils",
+        "libexynosdisplay",
+        "libmpp",
+    ],
+    srcs: [
+        "libvppvirtualdisplay/ExynosVirtualDisplay.cpp",
+    ],
+    cflags: [
+        "-DLOG_TAG=\"virtualdisplay\"",
+    ],
+}
+
+cc_library_shared {
+    name: "libhdmi",
+    defaults: [
+        "legacy_hwc_common_defaults",
+        "legacy_hdmi_board_defaults",
+    ],
+    shared_libs: [
+        "libhwcutils",
+        "libexynosdisplay",
+        "libmpp",
+    ],
+    srcs: select(soong_config_variable("exynos_legacy", "hdmi_incapable"), {
+        "true": ["libhdmi_dummy/ExynosExternalDisplay.cpp"],
+        default: [
+            "libvpphdmi/ExynosExternalDisplay.cpp",
+            "libvpphdmi/dv_timings.c",
+        ],
+    }),
+}
+
+cc_library_shared {
+    name: "libhwcutils",
+    defaults: [
+        "legacy_hwc_common_defaults",
+        "legacy_hwcutils_board_defaults",
+    ],
+    shared_libs: [
+        "libmpp",
+    ],
+    srcs: [
+        "libhwcutils/ExynosHWCUtils.cpp",
+        "libhwcutils/ExynosMPPv2.cpp",
+    ],
+    cflags: [
+        "-DLOG_TAG=\"hwcutils\"",
+    ],
+}
+
+cc_library_shared {
+    name: "libexynosdisplay",
+    defaults: [
+        "legacy_hwc_common_defaults",
+        "legacy_display_board_defaults",
+    ],
+    shared_libs: [
+        "libhwcutils",
+        "libhardware",
+    ],
+    srcs: [
+        "libvppdisplay/ExynosDisplay.cpp",
+        "libvppdisplay/ExynosOverlayDisplay.cpp",
+        "libvppdisplay/ExynosDisplayResourceManager.cpp",
+    ],
+}
+
+cc_binary {
+    name: "hwcdebug",
+    vendor: true,
+    enabled: select(soong_config_variable("exynos_legacy", "hwc_debug"), {
+        "true": true,
+        default: false,
+    }),
+    srcs: [
+        "ExynosHWCDebug.c",
+    ],
+}
+
+exynos_legacy_cc_library_shared {
+    name: "hwcomposer.target_bootloader_board_name",
+    defaults: [
+        "legacy_hwc_common_defaults",
+    ],
+    relative_install_path: "hw",
+    shared_libs: [
+        "libhardware",
+        "libhardware_legacy",
+        "libhwcutils",
+        "libexynosdisplay",
+        "libhdmi",
+        "libmpp",
+    ] + select(soong_config_variable("exynos_legacy", "virtual_display"), {
+        "true": ["libvirtualdisplay"],
+        default: [],
+    }) + select(soong_config_variable("exynos_legacy", "hwc_services"), {
+        "true": ["libExynosHWCService"],
+        default: [],
+    }),
+    srcs: [
+        "ExynosHWC.cpp",
+    ],
+    cflags: [
+        "-DLOG_TAG=\"hwcomposer\"",
+    ],
+    soong_config_variables: {
+        bootloader_board: {
+            name: "hwcomposer.%s",
+        },
+    },
+}

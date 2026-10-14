@@ -1,0 +1,37 @@
+// Copyright (C) 2026 The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+
+cc_library_shared {
+    name: "libmpp",
+    defaults: [
+        "exynos_legacy_board_defaults",
+    ],
+    enabled: select(soong_config_variable("exynos_legacy", "hwc1"), {
+        "true": true,
+        default: false,
+    }),
+    shared_libs: [
+        "liblog",
+        "libutils",
+        "libcutils",
+        "libexynosutils",
+        "libexynosv4l2",
+        "libexynosgscaler",
+    ],
+    include_dirs: [
+        "hardware/samsung_slsi-linaro/graphics/base/legacy/include",
+        "hardware/samsung_slsi-linaro/graphics/base/include",
+        "hardware/samsung_slsi-linaro/exynos/include",
+        "hardware/samsung_slsi-linaro/exynos/libexynosutils",
+    ],
+
+    srcs: [
+        "MppFactory.cpp",
+    ],
+    export_include_dirs: [
+        ".",
+    ],
+    export_shared_lib_headers: [
+        "libexynosgscaler",
+    ],
+}
