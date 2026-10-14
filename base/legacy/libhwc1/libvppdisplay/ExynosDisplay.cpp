@@ -1433,23 +1433,13 @@ void ExynosDisplay::configureHandle(private_handle_t *handle, size_t index,
     cfg.src.f_h = handle->vstride;
     if (handle->format == HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SP_M_PRIV) {
         if (handle->fd2 >= 0) {
-            ExynosVideoMeta *metaData = NULL;
-            int interlacedType = -1;
-            metaData = (ExynosVideoMeta*)mmap(0, sizeof(ExynosVideoMeta), PROT_READ|PROT_WRITE, MAP_SHARED, handle->fd2, 0);
-            if ((metaData) &&
-                (metaData->eType & VIDEO_INFO_TYPE_INTERLACED)) {
-                interlacedType = metaData->data.dec.nInterlacedType;
-            } else {
-                interlacedType = -1;
-            }
+            int interlacedType = getInterlacedType(handle->fd2);
 
             if (interlacedType == V4L2_FIELD_INTERLACED_TB ||
                 interlacedType == V4L2_FIELD_INTERLACED_BT) {
                 cfg.src.f_w = handle->stride * 2;
                 cfg.src.f_h = handle->vstride / 2;
             }
-            if (metaData)
-                munmap(metaData, 64);
         }
     }
 
@@ -2369,19 +2359,8 @@ void ExynosDisplay::determineYuvOverlay(hwc_display_contents_1_t *contents)
 
                 /* support to process interlaced color format data */
                 if (handle->format == HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SP_M_PRIV) {
-                    ExynosVideoMeta *metaData = NULL;
-                    int interlacedType = -1;
+                    int interlacedType = getInterlacedType(handle->fd2);
                     mOriginFrect.push(layer.sourceCropf);
-
-                    if (handle->fd2 >= 0) {
-                        metaData = (ExynosVideoMeta*)mmap(0, sizeof(ExynosVideoMeta), PROT_READ|PROT_WRITE, MAP_SHARED, handle->fd2, 0);
-                        if ((metaData) &&
-                            (metaData->eType & VIDEO_INFO_TYPE_INTERLACED)) {
-                            interlacedType = metaData->data.dec.nInterlacedType;
-                        } else {
-                            interlacedType = -1;
-                        }
-                    }
 
                     if (interlacedType == V4L2_FIELD_INTERLACED_BT) {
                         if ((int)layer.sourceCropf.left < (int)(handle->stride)) {
@@ -2395,8 +2374,6 @@ void ExynosDisplay::determineYuvOverlay(hwc_display_contents_1_t *contents)
                     }
                     mBackUpFrect.push(layer.sourceCropf);
 
-                    if (metaData)
-                        munmap(metaData, 64);
                 }
 
                 if (isOverlaySupported(contents->hwLayers[i], i, useVPPOverlayFlag, &supportedInternalMPP, &supportedExternalMPP)) {

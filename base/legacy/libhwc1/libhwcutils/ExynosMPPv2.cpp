@@ -425,21 +425,13 @@ void ExynosMPP::setupSrc(exynos_mpp_img &srcImg, hwc_layer_1_t &layer)
 
     if (srcHandle->format == HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SP_M_PRIV) {
         if (srcHandle->fd2 >= 0) {
-            void *metaData = NULL;
-            int interlacedType = -1;
-            metaData = mmap(0, 64, PROT_READ|PROT_WRITE, MAP_SHARED, srcHandle->fd2, 0);
-            if (metaData)
-                interlacedType = *(int *)metaData;
-            else
-                interlacedType = -1;
+            int interlacedType = getInterlacedType(srcHandle->fd2);
 
             if (interlacedType == V4L2_FIELD_INTERLACED_TB ||
                 interlacedType == V4L2_FIELD_INTERLACED_BT) {
                 srcImg.fw = srcHandle->stride * 2;
                 srcImg.fh = srcHandle->vstride / 2;
             }
-            if (metaData)
-                munmap(metaData, 64);
         }
     }
 
