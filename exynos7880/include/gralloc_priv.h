@@ -168,8 +168,8 @@ struct private_handle_t {
 
     {
         version = sizeof(native_handle);
-        numInts = sNumInts();
-        numFds = sNumFds;
+        numFds = 1 + (fd1 >= 0) + (fd2 >= 0);
+        numInts = sNumInts() + sNumFds - numFds;
     }
     ~private_handle_t() {
         magic = 0;
