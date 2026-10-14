@@ -24,6 +24,7 @@ LOCAL_SRC_FILES:= \
 	FimgExynos5.cpp
 
 LOCAL_C_INCLUDES += \
+	$(BOARD_EXYNOS_GRALLOC_INCLUDE_DIR) \
 	$(LOCAL_PATH)/../include \
 	hardware/samsung_slsi-linaro/$(TARGET_SOC)/include \
 	hardware/samsung_slsi-linaro/$(TARGET_BOARD_PLATFORM)/include
