@@ -1,0 +1,38 @@
+// Copyright (C) 2026 The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+
+filegroup {
+    name: "exynos7880_legacy_display_sources",
+    srcs: [
+        "libdisplaymodule/ExynosPrimaryDisplay.cpp",
+        "libdisplaymodule/ExynosDisplayResourceManagerModule.cpp",
+    ],
+}
+
+filegroup {
+    name: "exynos7880_legacy_hwcutils_sources",
+    srcs: [
+        "libhwcutilsmodule/ExynosMPPModule.cpp",
+    ],
+}
+
+filegroup {
+    name: "exynos7880_legacy_hdmi_sources",
+    srcs: [
+        "libhdmimodule/ExynosExternalDisplayModule.cpp",
+    ],
+}
+
+filegroup {
+    name: "exynos7880_legacy_virtualdisplay_sources",
+    srcs: [
+        "libvirtualdisplaymodule/ExynosVirtualDisplayModule.cpp",
+    ],
+}
+
+filegroup {
+    name: "exynos7880_legacy_display_secondary_sources",
+    srcs: [
+        "libdisplaymodule/*SecondaryDisplay*.cpp",
+    ],
+}
