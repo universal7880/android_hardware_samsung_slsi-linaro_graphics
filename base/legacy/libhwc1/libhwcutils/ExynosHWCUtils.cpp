@@ -1,4 +1,6 @@
 #include "ExynosHWCUtils.h"
+#include <sys/mman.h>
+#include "VendorVideoAPI.h"
 #include "ExynosHWCDebug.h"
 
 #ifndef HDMI_INCAPABLE
@@ -282,6 +284,25 @@ bool isUHD(const hwc_layer_1_t &layer)
 {
     return (WIDTH(layer.sourceCropf) >= UHD_WIDTH &&
             HEIGHT(layer.sourceCropf) >= UHD_HEIGHT);
+}
+
+int getInterlacedType(int fd)
+{
+    if (fd < 0)
+        return -1;
+
+    const size_t metadataSize = sizeof(ExynosVideoMeta);
+    const ExynosVideoMeta *metadata = static_cast<const ExynosVideoMeta *>(
+            mmap(NULL, metadataSize, PROT_READ, MAP_SHARED, fd, 0));
+    if (metadata == MAP_FAILED)
+        return -1;
+
+    int interlacedType = -1;
+    if (metadata->eType & VIDEO_INFO_TYPE_INTERLACED)
+        interlacedType = metadata->data.dec.nInterlacedType;
+
+    munmap(const_cast<ExynosVideoMeta *>(metadata), metadataSize);
+    return interlacedType;
 }
 
 bool isFullRangeColor(const hwc_layer_1_t &layer)
