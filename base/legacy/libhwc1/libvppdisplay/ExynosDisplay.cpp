@@ -1516,7 +1516,10 @@ void ExynosDisplay::configureHandle(private_handle_t *handle, size_t index,
                 cfg.src.h /= 2;
         }
     }
-    cfg.vpp_parm.eq_mode = isFullRangeColor(layer) ? BT_601_WIDE : BT_601_NARROW;
+    if (getVideoColorSpace(layer) == V4L2_COLORSPACE_REC709)
+        cfg.vpp_parm.eq_mode = isFullRangeColor(layer) ? BT_709_WIDE : BT_709_NARROW;
+    else
+        cfg.vpp_parm.eq_mode = isFullRangeColor(layer) ? BT_601_WIDE : BT_601_NARROW;
 
 #if 0
     /* transparent region coordinates is on source buffer */

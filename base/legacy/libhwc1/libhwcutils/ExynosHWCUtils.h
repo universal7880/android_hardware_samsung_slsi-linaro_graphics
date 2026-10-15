@@ -128,6 +128,7 @@ bool isFloat(float f);
 bool isUHD(const hwc_layer_1_t &layer);
 int getInterlacedType(int fd);
 bool isFullRangeColor(const hwc_layer_1_t &layer);
+unsigned int getVideoColorSpace(const hwc_layer_1_t &layer);
 bool isCompressed(const hwc_layer_1_t &layer);
 bool compareYuvLayerConfig(int videoLayers, uint32_t index,
         hwc_layer_1_t &layer,

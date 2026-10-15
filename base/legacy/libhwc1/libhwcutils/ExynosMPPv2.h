@@ -180,6 +180,7 @@ class ExynosMPP {
         alloc_device_t*                 mAllocDevice;
         size_t                          mNumAvailableDstBuffers;
         size_t                          mBufferType;
+        unsigned int                    mCSCColorSpace;
         int                             mSMemFd;
         bool                            mCanBeUsed;
         uint32_t                        mAllocatedBufferNum;
