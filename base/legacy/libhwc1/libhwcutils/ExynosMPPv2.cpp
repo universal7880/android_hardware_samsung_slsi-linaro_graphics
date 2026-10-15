@@ -47,6 +47,7 @@ void ExynosMPP::initMPP()
     mAllocDevice = NULL;
     mNumAvailableDstBuffers = NUM_MPP_DST_BUFS;
     mBufferType = MPP_BUFFER_NORMAL;
+    mCSCColorSpace = V4L2_COLORSPACE_SMPTE170M;
     mSMemFd = -1;
     if (mType == MPP_MSC) {
         mSMemFd = open(SMEM_PATH, O_RDWR);
@@ -597,10 +598,7 @@ void ExynosMPP::setupDst(exynos_mpp_img &srcImg, exynos_mpp_img &dstImg,
     if (dstFormat == HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SP_M_PRIV)
         dstImg.format = HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SP_M;
     dstImg.mem_type = MPP_MEM_DMABUF;
-    if (srcHandle->format == HAL_PIXEL_FORMAT_EXYNOS_YCrCb_420_SP_M_FULL)
-        dstImg.narrowRgb = 0;
-    else
-        dstImg.narrowRgb = !isFormatRgb(srcHandle->format);
+    dstImg.narrowRgb = !isFormatRgb(srcHandle->format) && !isFullRangeColor(layer);
 }
 
 void ExynosMPP::setupBlendCfg(exynos_mpp_img __unused &srcImg, exynos_mpp_img &dstImg,
@@ -882,7 +880,8 @@ int ExynosMPP::processM2M(hwc_layer_1_t &layer, int dstFormat, hwc_frect_t *sour
     bool needDoubleOperation = setupDoubleOperation(srcImg, midImg, layer);
 
     bool reconfigure = isSrcConfigChanged(srcImg, mSrcConfig) ||
-            isDstConfigChanged(dstImg, mDstConfig);
+            isDstConfigChanged(dstImg, mDstConfig) ||
+            mCSCColorSpace != getVideoColorSpace(layer);
 
     mDstRealloc = mDstConfig.fw <= 0 ||
         mDstConfig.format != (uint32_t)dstFormat ||
@@ -1017,7 +1016,7 @@ int ExynosMPP::processM2M(hwc_layer_1_t &layer, int dstFormat, hwc_frect_t *sour
             ALOGE("failed to stop mType(%u) mIndex(%u)", mType, mIndex);
             goto err_gsc_config;
         }
-        ret = setCSCProperty(mMPPHandle, 0, !midImg.narrowRgb, 1);
+        ret = setCSCProperty(mMPPHandle, 0, !midImg.narrowRgb, getVideoColorSpace(layer));
         ret = configMPP(mMPPHandle, &srcImg, &midImg);
         if (ret < 0) {
             ALOGE("failed to configure mType(%u) mIndex(%u)", mType, mIndex);
@@ -1040,7 +1039,7 @@ int ExynosMPP::processM2M(hwc_layer_1_t &layer, int dstFormat, hwc_frect_t *sour
         }
 
         midImg.acquireFenceFd = midImg.releaseFenceFd;
-        ret = setCSCProperty(mMPPHandle, 0, !dstImg.narrowRgb, 1);
+        ret = setCSCProperty(mMPPHandle, 0, !dstImg.narrowRgb, getVideoColorSpace(layer));
         ret = configMPP(mMPPHandle, &midImg, &dstImg);
         if (ret < 0) {
             ALOGE("failed to configure mType(%u) mIndex(%u)", mType, mIndex);
@@ -1055,6 +1054,7 @@ int ExynosMPP::processM2M(hwc_layer_1_t &layer, int dstFormat, hwc_frect_t *sour
         mMidBufFence[mCurrentBuf] = midImg.releaseFenceFd;
     }
 
+    mCSCColorSpace = getVideoColorSpace(layer);
     mSrcConfig = srcImg;
     mMidConfig = midImg;
 
@@ -1186,7 +1186,7 @@ int ExynosMPP::processM2MWithB(hwc_layer_1_t &layer1, hwc_layer_1_t &layer2, int
             midImg.vaddr = midHandle->fd2;
         }
 
-        ret = setCSCProperty(mMPPHandle, 0, !midImg.narrowRgb, 1);
+        ret = setCSCProperty(mMPPHandle, 0, !midImg.narrowRgb, getVideoColorSpace(layer1));
 
         HDEBUGLOGD(eDebugMPP, "src configuration:\n");
         dumpMPPImage(eDebugMPP, srcImg);
@@ -1265,7 +1265,7 @@ int ExynosMPP::processM2MWithB(hwc_layer_1_t &layer1, hwc_layer_1_t &layer2, int
     HDEBUGLOGD(eDebugMPP, "Blend Information:\n");
     dumpBlendMPPImage(eDebugMPP, srcblendinfo);
 
-    ret = setCSCProperty(mMPPHandle, 0, !dstImg.narrowRgb, 1);
+    ret = setCSCProperty(mMPPHandle, 0, !dstImg.narrowRgb, getVideoColorSpace(layer1));
 
     ret = configBlendMpp(mMPPHandle, &srcImg, &dstImg, &srcblendinfo);
     if (ret < 0) {
@@ -1279,6 +1279,7 @@ int ExynosMPP::processM2MWithB(hwc_layer_1_t &layer1, hwc_layer_1_t &layer2, int
         goto err_gsc_config;
     }
 
+    mCSCColorSpace = getVideoColorSpace(layer1);
     mSrcConfig = srcImg;
     mDstConfig = dstImg;
     mDoubleOperation = false;

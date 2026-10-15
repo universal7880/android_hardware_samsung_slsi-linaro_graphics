@@ -1,5 +1,7 @@
 #include "ExynosHWCUtils.h"
 #include <sys/mman.h>
+#include <unistd.h>
+#include <media/hardware/VideoAPI.h>
 #include "VendorVideoAPI.h"
 #include "ExynosHWCDebug.h"
 
@@ -305,10 +307,51 @@ int getInterlacedType(int fd)
     return interlacedType;
 }
 
+static bool getVideoColorAspects(const hwc_layer_1_t &layer, ExynosColorAspects &aspects)
+{
+    const private_handle_t *handle = private_handle_t::dynamicCast(layer.handle);
+    if (!handle || handle->format != HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SP_M_PRIV ||
+        handle->fd2 < 0)
+        return false;
+
+    // dma-buf reports its size through llseek on older kernels.
+    if (lseek(handle->fd2, 0, SEEK_END) < (off_t)sizeof(ExynosVideoMeta))
+        return false;
+
+    const ExynosVideoMeta *metadata = static_cast<const ExynosVideoMeta *>(
+            mmap(NULL, sizeof(ExynosVideoMeta), PROT_READ, MAP_SHARED, handle->fd2, 0));
+    if (metadata == MAP_FAILED)
+        return false;
+
+    bool valid = metadata->eType & VIDEO_INFO_TYPE_COLOR_ASPECTS;
+    if (valid)
+        aspects = metadata->sColorAspects;
+    munmap(const_cast<ExynosVideoMeta *>(metadata), sizeof(ExynosVideoMeta));
+    return valid;
+}
+
 bool isFullRangeColor(const hwc_layer_1_t &layer)
 {
-    private_handle_t *handle = private_handle_t::dynamicCast(layer.handle);
-    return (handle->format == HAL_PIXEL_FORMAT_EXYNOS_YCrCb_420_SP_M_FULL);
+    ExynosColorAspects aspects;
+    if (getVideoColorAspects(layer, aspects)) {
+        if (aspects.mRange == android::ColorAspects::RangeFull)
+            return true;
+        if (aspects.mRange == android::ColorAspects::RangeLimited)
+            return false;
+    }
+
+    const private_handle_t *handle = private_handle_t::dynamicCast(layer.handle);
+    return handle && handle->format == HAL_PIXEL_FORMAT_EXYNOS_YCrCb_420_SP_M_FULL;
+}
+
+unsigned int getVideoColorSpace(const hwc_layer_1_t &layer)
+{
+    ExynosColorAspects aspects;
+    if (getVideoColorAspects(layer, aspects) &&
+        aspects.mMatrixCoeffs == android::ColorAspects::MatrixBT709_5)
+        return V4L2_COLORSPACE_REC709;
+
+    return V4L2_COLORSPACE_SMPTE170M;
 }
 
 bool isCompressed(const hwc_layer_1_t &layer)
