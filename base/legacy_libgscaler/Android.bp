@@ -1,4 +1,3 @@
-
 cc_library_shared {
     name: "libexynosgscaler",
     cflags: [
@@ -21,14 +20,15 @@ cc_library_shared {
     ],
 
     local_include_dirs: ["include"],
- 
+
     export_include_dirs: ["include"],
+    export_shared_lib_headers: ["libexynosscaler"],
 
     srcs: [
         "libgscaler_obj.cpp",
         "libgscaler.cpp",
         "exynos_subdev.c",
-    ] ,
+    ],
 
     proprietary: true,
 }
