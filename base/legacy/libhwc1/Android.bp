@@ -88,6 +88,9 @@ cc_library_shared {
     shared_libs: [
         "libmpp",
     ],
+    header_libs: [
+        "media_plugin_headers",
+    ],
     srcs: [
         "libhwcutils/ExynosHWCUtils.cpp",
         "libhwcutils/ExynosMPPv2.cpp",
