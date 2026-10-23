@@ -52,15 +52,14 @@ cc_defaults {
 
 exynos_legacy_cc_defaults {
     name: "legacy_display_board_defaults",
+    srcs: select(soong_config_variable("exynos_legacy", "display_extra_srcs"), {
+        any @ sources: sources,
+        default: [],
+    }),
     soong_config_variables: {
         soc_base: {
             srcs: [
                 ":%s_legacy_display_sources",
-            ],
-        },
-        display_extra_srcs: {
-            srcs: [
-                "%s",
             ],
         },
     },
