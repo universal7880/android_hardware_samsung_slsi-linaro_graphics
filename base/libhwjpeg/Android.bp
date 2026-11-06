@@ -20,6 +20,9 @@ cc_library_shared {
     ] + select(soong_config_variable("libhwjpeg", "LIBHWJPEG_USES_G2D"), {
         "true": ["-DUSE_G2D_SCALER"],
         default: [],
+    }) + select(soong_config_variable("libhwjpeg", "LIBHWJPEG_USES_V4L2"), {
+        "true": ["-DUSE_V4L2_SCALER"],
+        default: [],
     }) + select(soong_config_variable("libhwjpeg", "HWJPEG_ANDROID_VERSION"), {
         any @ hwjpeg_android_version: ["-DHWJPEG_ANDROID_VERSION=" + hwjpeg_android_version],
         default: ["-DHWJPEG_ANDROID_VERSION=13"],
@@ -29,9 +32,10 @@ cc_library_shared {
         "libutils",
         "libcutils",
         "libion_exynos",
-        "libgiantmscl",
-        "libacryl",
-    ],
+    ] + select(soong_config_variable("libhwjpeg", "LIBHWJPEG_USES_V4L2"), {
+        "true": [],
+        default: ["libgiantmscl", "libacryl"],
+    }),
     header_libs: [
         "libcutils_headers",
         "libsystem_headers",
@@ -50,9 +54,10 @@ cc_library_shared {
         "ExynosJpegEncoderForCamera.cpp",
         "libhwjpeg-exynos.cpp",
         "ThumbnailScaler.cpp",
-        "GiantThumbnailScaler.cpp",
-        "G2dThumbnailScaler.cpp",
-    ],
+    ] + select(soong_config_variable("libhwjpeg", "LIBHWJPEG_USES_V4L2"), {
+        "true": [],
+        default: ["GiantThumbnailScaler.cpp", "G2dThumbnailScaler.cpp"],
+    }),
 
     proprietary: true,
 

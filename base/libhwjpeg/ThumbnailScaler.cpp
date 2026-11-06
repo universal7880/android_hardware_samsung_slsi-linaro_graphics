@@ -18,11 +18,14 @@
 
 #include "ThumbnailScaler.h"
 #include "LibScalerForJpeg.h"
+#ifndef USE_V4L2_SCALER
 #include "GiantThumbnailScaler.h"
 #include "G2dThumbnailScaler.h"
+#endif
 
 ThumbnailScaler *ThumbnailScaler::createInstance()
 {
+#ifndef USE_V4L2_SCALER
 #ifdef USE_G2D_SCALER
     G2dThumbnailScaler *scaler = new G2dThumbnailScaler();
     if (scaler->available()) {
@@ -38,6 +41,7 @@ ThumbnailScaler *ThumbnailScaler::createInstance()
 #endif
 
     delete scaler;
+#endif
 
     ALOGI("Created thumbnail scaler: legacy V4L2 Scaler");
     return new LibScalerForJpeg();
