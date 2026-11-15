@@ -119,7 +119,7 @@ cc_defaults {
     header_libs: [
         "libhdrInterface_headers",
         "libhdr10p_meta_interface_header",
-        "device_kernel_headers",
+        "//hardware/samsung_slsi-linaro/exynos:exynos_bsp_kernel_headers",
         "libhardware_legacy_headers",
         "libbinder_headers",
         "libexynos_headers",
